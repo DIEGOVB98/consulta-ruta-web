@@ -37,8 +37,11 @@ def index():
             result = "<b>El código no existe. Consultar ruta con el equipo de soporte logística.</b>"
         else:
             dias_ruta = row.iloc[0]["DIAS DE RUTA"]
-            hoy = datetime.today().strftime('%A')
-            hoy_espanol = {
+            hoy = datetime.now()
+            hoy_nombre = hoy.strftime('%A')
+            manana_nombre = (hoy + timedelta(days=1)).strftime('%A')
+
+            traductor_dias = {
                 "Monday": "Lunes",
                 "Tuesday": "Martes",
                 "Wednesday": "Miercoles",
@@ -46,25 +49,20 @@ def index():
                 "Friday": "Viernes",
                 "Saturday": "Sábado",
                 "Sunday": "Domingo"
-            }[datetime.today().strftime('%A')]
+            }
 
+            hoy_espanol = traductor_dias[hoy_nombre]
+            manana_espanol = traductor_dias[manana_nombre]
+
+            # Prioridad: alta si la ruta es mañana, media en otro caso
+            prioridad = "Alta" if manana_espanol in dias_ruta else "Media"
+
+            # Mostrar mensaje adicional solo si hoy es día de ruta
             mensaje_extra = ""
             if hoy_espanol in dias_ruta:
                 otros_dias = [dia for dia in dias_ruta if dia != hoy_espanol]
                 mensaje_extra = f"<br><b>Este cliente tiene una ruta el día de hoy.</b> Consultar a soporte logística si saldrá hoy mismo o se pasa a la ruta de: {', '.join(otros_dias)}."
 
-            manana = (datetime.today() + timedelta(days=1)).strftime('%A')
-            manana_espanol = {
-                "Monday": "Lunes",
-                "Tuesday": "Martes",
-                "Wednesday": "Miercoles",
-                "Thursday": "Jueves",
-                "Friday": "Viernes",
-                "Saturday": "Sábado",
-                "Sunday": "Domingo"
-            }[manana]
-
-            prioridad = "Alta" if manana_espanol in dias_ruta else "Media"
             result = f"<b>Días de ruta:</b> {', '.join(dias_ruta)}<br><b>Prioridad:</b> {prioridad}{mensaje_extra}"
 
     return render_template_string('''
